@@ -23,7 +23,6 @@ def setup_page_config():
 import streamlit as st
 
 def create_input_tabs():
-    """Create input tabs for video upload and raw data input"""
     tab1, tab2 = st.tabs(["📹 Video Upload", "📝 Raw Data Input"])
 
     with tab1:
@@ -31,7 +30,6 @@ def create_input_tabs():
         
         video_file = st.file_uploader("📤 Upload Sports Video", type=["mp4", "mkv", "mov", "avi"])
 
-        # Spoken language selector (for Whisper)
         spoken_language_code = st.selectbox(
             "🎙️ Spoken language in the video:",
             [
@@ -41,16 +39,17 @@ def create_input_tabs():
                 ("Spanish", "es"),
                 ("Hindi", "hi"),
                 ("French", "fr"),
-                ("French (Canada)", "fr")  # same code, prompt handles dialect
+                ("French (Canada)", "fr")
             ],
             format_func=lambda x: x[0]
         )[1]
 
-        # Output language selector (for article generation)
         article_language = st.selectbox(
             "📰 Generate article in:",
             ["English", "Nepali", "Spanish", "Hindi", "French", "French (Canada)"]
         )
+
+        generate_article_button = st.button("▶️ Generate Article from Video")
 
     with tab2:
         st.markdown("Enter raw match data, commentary, or any text information about the match to generate a news article.")
@@ -61,8 +60,7 @@ def create_input_tabs():
         )
         generate_from_text = st.button("Generate Article from Text Data")
 
-    return video_file, raw_match_data, generate_from_text, spoken_language_code, article_language
-
+    return video_file, spoken_language_code, article_language, generate_article_button, raw_match_data, generate_from_text
 
 
 def display_article_with_editor():

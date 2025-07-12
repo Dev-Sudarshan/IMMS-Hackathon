@@ -45,7 +45,7 @@ def process_video_upload(video_file, spoken_language_code, article_language):
         if global_best_frame:
             image_base64 = image_to_base64(global_best_frame['image_path'])
             st.session_state.article_image_base64 = image_base64
-            st.session_state.article_caption = generate_short_caption(global_best_frame['description'])
+            st.session_state.article_caption = generate_short_caption(global_best_frame['description'], article_language)
 
         cleanup_files(TEMP_AUDIO_FILE)
 
@@ -78,9 +78,18 @@ def main():
     initialize_session_state()
     setup_page_config()
 
-    video_file, raw_match_data, generate_from_text, spoken_language_code, article_language = create_input_tabs()
+    # Note: this matches the create_input_tabs() from the last ui_components.py I gave you
+    (
+        video_file,
+        spoken_language_code,
+        article_language,
+        generate_article_button,
+        raw_match_data,
+        generate_from_text,
+    ) = create_input_tabs()
 
-    if video_file is not None:
+    # Only process video if user clicks generate button
+    if video_file is not None and generate_article_button:
         process_video_upload(video_file, spoken_language_code, article_language)
 
     if generate_from_text:
