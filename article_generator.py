@@ -1,13 +1,12 @@
-
 import requests
 import json
 import streamlit as st
 from config import DEPLOYMENT_URL, HEADERS
 
-def generate_article_from_text(raw_data):
-    """Generate news article from raw text data only"""
+def generate_article_from_text(raw_data, output_language="English"):
+    """Generate news article from raw text data only, in specified language"""
     prompt = f"""
-Write a factual sports news article based on the raw match data provided below.
+Write a factual sports news article in **{output_language}** based on the raw match data provided below.
 
 KEY INSTRUCTIONS:
 - Only use information provided below - do not invent any details
@@ -38,10 +37,11 @@ Write the article now:
     
     return "[Error generating article]"
 
-def generate_short_caption(frame_description):
-    """Generate a short 1-2 line caption for the key frame"""
+
+def generate_short_caption(frame_description, output_language="English"):
+    """Generate a short 1-2 line caption for the key frame, in specified language"""
     prompt = f"""
-Based on this detailed frame analysis, write a short 1-2 line caption that captures the main action happening in this football match moment.
+Based on this detailed frame analysis, write a short 1-2 line caption in **{output_language}** that captures the main action happening in this football match moment.
 
 Frame analysis: {frame_description}
 
@@ -64,16 +64,16 @@ Write a concise caption (maximum 2 lines) that describes the key action:
     
     return "Key moment from the match"
 
-def generate_article(transcript, all_descriptions, best_frame_data):
-    """Generate news article from transcript and descriptions"""
-    # Prepare descriptions text
+
+def generate_article(transcript, all_descriptions, best_frame_data, output_language="English"):
+    """Generate news article from transcript and descriptions, in specified language"""
     descriptions_text = "\n".join([
         f"Frame {i+1}: {desc['description']} (Importance: {desc['score']}/10)"
         for i, desc in enumerate(all_descriptions)
     ])
     
     prompt = f"""
-Write a factual sports news article based on the transcript and image analysis below. 
+Write a factual sports news article in **{output_language}** based on the transcript and image analysis below. 
 
 KEY INSTRUCTIONS:
 - Only use information provided below - do not invent any details
@@ -111,8 +111,9 @@ Write the article now:
     
     return "[Error generating article]"
 
-def edit_article_with_prompt(original_article, user_prompt):
-    """Edit the generated article based on user's custom prompt"""
+
+def edit_article_with_prompt(original_article, user_prompt, output_language="English"):
+    """Edit the generated article based on user's custom prompt, in specified language"""
     prompt = f"""
 You are a professional sports news editor. Edit the following article based on the user's specific request.
 
@@ -128,6 +129,7 @@ KEY INSTRUCTIONS:
 - Keep it professional and news-appropriate
 - If the request asks for information not in the original article, politely mention that the information is not available
 - Return only the edited article, no additional commentary
+- Make sure the edited article remains in **{output_language}**
 
 EDITED ARTICLE:
 """
