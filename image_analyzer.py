@@ -42,8 +42,7 @@ def describe_image_with_scoring(image_path, timestamp):
                 ]
             }
         ],
-        "max_tokens": 400
-    }
+        "max_tokens": 300 }
     
     try:
         response = requests.post(DEPLOYMENT_URL, headers=HEADERS, data=json.dumps(payload))
