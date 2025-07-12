@@ -2,7 +2,6 @@ import streamlit as st
 import base64
 from article_generator import edit_article_with_prompt
 
-
 def initialize_session_state():
     """Initialize session state variables"""
     if 'generated_article' not in st.session_state:
@@ -16,7 +15,6 @@ def initialize_session_state():
 def setup_page_config():
     """Setup Streamlit page configuration"""
     st.set_page_config(page_title="🏆 Sports Video to News Generator", layout="wide")
-
     st.markdown("""
         <div style='margin-bottom: 2rem;'>
             <h1 style='font-size: 3rem; color: #0B5ED7; margin-bottom: 0.3rem;'>
@@ -38,16 +36,53 @@ def create_input_tabs():
         st.markdown("Upload a sports video, and this tool will analyze frames and audio to generate a professional news article.")
         video_file = st.file_uploader("📤 Upload Sports Video", type=["mp4", "mkv", "mov", "avi"])
 
+        spoken_language_code = st.selectbox(
+            "🎙️ Spoken language in the video:",
+            [
+                ("Auto-detect", None),
+                ("English", "en"),
+                ("Nepali", "ne"),
+                ("Spanish", "es"),
+                ("Hindi", "hi"),
+                ("French", "fr"),
+                ("French (Canada)", "fr")
+            ],
+            format_func=lambda x: x[0]
+        )[1]
+
+        article_language = st.selectbox(
+            "📰 Generate article in:",
+            ["English", "Nepali", "Spanish", "Hindi", "French", "French (Canada)"]
+        )
+
+        generate_article_button = st.button("▶️ Generate Article from Video")
+
     with tab2:
-        st.markdown("Enter raw match data, commentary, or any text information about the match to generate a news article.")
+        st.markdown("Enter raw match data manually, or upload structured JSON/timestamp files.")
+
+        # Text input
         raw_match_data = st.text_area(
-            "📝 Enter Match Data",
-            placeholder="Enter match commentary, statistics, player information, or any relevant match details...",
+            "📝 Enter Match Data (optional if uploading a file)",
+            placeholder="Enter match commentary, statistics, or structured notes...",
             height=200
         )
+
+        # File upload input
+        uploaded_data_file = st.file_uploader(
+            "📁 Or upload match data file (JSON, TXT, CSV)",
+            type=["json", "txt", "csv"]
+        )
+
         generate_from_text = st.button("Generate Article from Text Data")
 
-    return video_file, raw_match_data, generate_from_text
+    return (
+        video_file,
+        raw_match_data,
+        generate_from_text,
+        uploaded_data_file,
+        spoken_language_code,
+        article_language
+    )
 
 
 def display_article_with_editor():
@@ -57,7 +92,6 @@ def display_article_with_editor():
 
     st.subheader("📰 Generated News Article")
 
-    # Display image if available
     if st.session_state.article_image_base64:
         try:
             image_data = base64.b64decode(st.session_state.article_image_base64)

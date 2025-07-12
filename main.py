@@ -14,6 +14,10 @@ from ui_components import (
     display_article_with_editor,
 )
 
+# Default settings for spoken and article language
+DEFAULT_SPOKEN_LANGUAGE_CODE = "en"
+DEFAULT_ARTICLE_LANGUAGE = "en"
+
 def process_video_upload(video_file, spoken_language_code, article_language):
     with NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video:
         temp_video.write(video_file.read())
@@ -24,14 +28,14 @@ def process_video_upload(video_file, spoken_language_code, article_language):
         frame_groups = extract_frame_groups(video_path, FRAMES_FOLDER, fps=1, group_size=5)
 
         if not frame_groups:
-            st.error("No frames could be extracted from the video")
+            st.error("No frames could be extracted from the video.")
             return
 
         st.info("🔍 Analyzing frames...")
         best_frames, all_frame_data = find_best_frames_per_group(frame_groups)
 
         if not best_frames:
-            st.error("Could not analyze any frames")
+            st.error("Could not analyze any frames.")
             return
 
         global_best_frame = find_global_best_frame(best_frames)
@@ -56,7 +60,6 @@ def process_video_upload(video_file, spoken_language_code, article_language):
         cleanup_files(video_path)
         cleanup_folder(FRAMES_FOLDER)
 
-
 def process_text_input(raw_match_data, article_language):
     if not raw_match_data.strip():
         st.warning("Please enter some match data in the text area.")
@@ -73,30 +76,25 @@ def process_text_input(raw_match_data, article_language):
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
 
-
 def main():
     initialize_session_state()
     setup_page_config()
 
-    # Note: this matches the create_input_tabs() from the last ui_components.py I gave you
-    (
-        video_file,
-        spoken_language_code,
-        article_language,
-        generate_article_button,
-        raw_match_data,
-        generate_from_text,
-    ) = create_input_tabs()
+    # Get inputs from user
+    video_file, raw_match_data, generate_from_text = create_input_tabs()
 
-    # Only process video if user clicks generate button
-    if video_file is not None and generate_article_button:
-        process_video_upload(video_file, spoken_language_code, article_language)
+    # Default language (you can later allow user to select these from sidebar or UI)
+    spoken_language_code = DEFAULT_SPOKEN_LANGUAGE_CODE
+    article_language = DEFAULT_ARTICLE_LANGUAGE
+
+    if video_file:
+        if st.button("🧠 Generate Article from Video"):
+            process_video_upload(video_file, spoken_language_code, article_language)
 
     if generate_from_text:
         process_text_input(raw_match_data, article_language)
 
     display_article_with_editor()
-
 
 if __name__ == "__main__":
     main()
