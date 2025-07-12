@@ -15,41 +15,28 @@ def initialize_session_state():
 
 def setup_page_config():
     """Setup Streamlit page configuration"""
-    st.set_page_config(page_title="Sports Video to News Generator")
-    st.title("🏆 Sports Video ➤ News Article Generator")
-    st.markdown("Upload a sports video or provide raw match data to generate a professional news article.")
+    st.set_page_config(page_title="🏆 Sports Video to News Generator", layout="wide")
 
+    st.markdown("""
+        <div style='margin-bottom: 2rem;'>
+            <h1 style='font-size: 3rem; color: #0B5ED7; margin-bottom: 0.3rem;'>
+                🏆 Sports Video ➤ News Article Generator
+            </h1>
+            <p style='font-size: 1.1rem; color: #555;'>
+                Transform your sports footage or match details into a professional news article — instantly and effortlessly.
+            </p>
+            <hr style="margin-top: 1.5rem;">
+        </div>
+    """, unsafe_allow_html=True)
 
-import streamlit as st
 
 def create_input_tabs():
+    """Create input tabs for video upload and raw data input"""
     tab1, tab2 = st.tabs(["📹 Video Upload", "📝 Raw Data Input"])
 
     with tab1:
         st.markdown("Upload a sports video, and this tool will analyze frames and audio to generate a professional news article.")
-        
         video_file = st.file_uploader("📤 Upload Sports Video", type=["mp4", "mkv", "mov", "avi"])
-
-        spoken_language_code = st.selectbox(
-            "🎙️ Spoken language in the video:",
-            [
-                ("Auto-detect", None),
-                ("English", "en"),
-                ("Nepali", "ne"),
-                ("Spanish", "es"),
-                ("Hindi", "hi"),
-                ("French", "fr"),
-                ("French (Canada)", "fr")
-            ],
-            format_func=lambda x: x[0]
-        )[1]
-
-        article_language = st.selectbox(
-            "📰 Generate article in:",
-            ["English", "Nepali", "Spanish", "Hindi", "French", "French (Canada)"]
-        )
-
-        generate_article_button = st.button("▶️ Generate Article from Video")
 
     with tab2:
         st.markdown("Enter raw match data, commentary, or any text information about the match to generate a news article.")
@@ -60,7 +47,7 @@ def create_input_tabs():
         )
         generate_from_text = st.button("Generate Article from Text Data")
 
-    return video_file, spoken_language_code, article_language, generate_article_button, raw_match_data, generate_from_text
+    return video_file, raw_match_data, generate_from_text
 
 
 def display_article_with_editor():
@@ -80,17 +67,15 @@ def display_article_with_editor():
         except Exception as e:
             st.error(f"Error displaying image: {str(e)}")
 
-    # Display the article
+    st.markdown("<div style='font-size: 1.1rem;'>", unsafe_allow_html=True)
     st.write(st.session_state.generated_article)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    # Article Editor Section
     st.markdown("---")
     st.subheader("✏️ Edit Article")
     st.markdown("Want to modify the article? Enter your editing instructions below:")
 
-    # Create columns for better layout
     col1, col2 = st.columns([3, 1])
-
     with col1:
         edit_prompt = st.text_area(
             "Enter your editing instructions:",
@@ -98,31 +83,21 @@ def display_article_with_editor():
             height=100,
             key="edit_prompt"
         )
-
     with col2:
-        st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
+        st.markdown("<br>", unsafe_allow_html=True)
         edit_button = st.button("🔄 Edit Article", type="primary")
-
-        # Reset button to restore original
         if st.button("↩️ Reset to Original"):
             st.rerun()
 
-    # Handle article editing
     if edit_button and edit_prompt.strip():
         with st.spinner("✏️ Editing article..."):
             try:
                 edited_article = edit_article_with_prompt(st.session_state.generated_article, edit_prompt)
-
-                # Update session state with edited article
                 st.session_state.generated_article = edited_article
-
-                # Show success message and rerun to display updated article
                 st.success("Article updated successfully!")
                 st.rerun()
-
             except Exception as e:
                 st.error(f"Error editing article: {str(e)}")
-
     elif edit_button and not edit_prompt.strip():
         st.warning("Please enter your editing instructions.")
 
@@ -173,19 +148,3 @@ def display_quick_edit_buttons():
                 )
                 st.session_state.generated_article = edited_article
                 st.rerun()
-
-
-def main():
-    """Main application function"""
-    initialize_session_state()
-    setup_page_config()
-    
-    # Create input interface
-    video_file, raw_match_data, generate_from_text = create_input_tabs()
-    
-    # Display article editor if article exists
-    display_article_with_editor()
-
-
-if __name__ == "__main__":
-    main()
